@@ -94,7 +94,7 @@ while getopts ":c:d:h:" opt; do
 
             # WHOIS
             printf "${GREEN}[+]${END} Checking WHOIS record\n"
-            whois $OPTARG | grep "@" | sed 's/.*: //g' | tr " " "\n" | sort -u
+            whois $OPTARG | sed 's/ /\n/g' | grep "@$OPTARG" | tr " " "\n" | sort -u
             printf "\n"
 
             # RFC 2142 (security@)
