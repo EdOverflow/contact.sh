@@ -54,3 +54,22 @@ For the best results, combine both flags as follows:
 ```
 $ ./contact.sh -d google.com -c google
 ```
+
+_contact.sh_ abides by the target's robots.txt file.
+
+```
+$ ./contact.sh -d linkedin.com
+
+
+ _  _ __ _|_ _  _ _|_    _ |_ 
+(_ (_)| | |_(_|(_  |_ o _> | |
+            ---
+        by EdOverflow
+
+
+[+] Finding security.txt files
+[!] The robots.txt file does not permit crawling this hostname.
+
+[+] Checking HackerOne's directory for hostname
+https://hackerone.com/linkedin
+```
