@@ -9,7 +9,7 @@ Make sure you have installed the `whois` and `jq` packages.
 
 ```
 $ git clone https://github.com/EdOverflow/contact.sh.git
-$ cd contact.sh
+$ cd contact.sh/
 $ chmod u+x contact.sh
 $ ./contact.sh -d google.com -c google
 ```
