@@ -44,7 +44,7 @@ domain() {
 
     # HackerOne
     printf "${GREEN}[+]${END} Checking HackerOne's directory for hostname \n | Confidence level: ${GREEN}★ ★ ★${END} \n"
-    HACKERONE_PATH=$(curl --silent "https://hackerone.com/programs/search?query=domain%3A$1&sort=published_at%3Adescending&page=1" | jq -r '.results[].url')
+    HACKERONE_PATH=$(curl -q --silent "https://hackerone.com/programs/search?query=domain%3A$1&sort=published_at%3Adescending&page=1" | jq -r '.results[].url')
     if [ ${#HACKERONE_PATH} -gt 0 ]; then
         for line in $HACKERONE_PATH; do
             echo "https://hackerone.com$line"
