@@ -27,11 +27,11 @@ $ ./contact.sh
 
 
 [i] Description: An OSINT tool to find contacts in order to report security vulnerabilities.
-[i] Usage: ./contact.sh [Options] use -d for hostnames (-d example.com) and -c for vendor name (-c example)
+[i] Usage: ./contact.sh [Options] use -d for hostnames (-d example.com), -c for vendor name (-c example), and -f for a list of hostnames in a file (-f domains.txt) 
 [i] Example: ./contact.sh -d google.com -c google
 ```
 
-Use the `-d` flag when trying to find addresses linked to a domain.
+Use the `-d` flag when trying to find addresses linked to a domain. _contact.sh_ will return a "Confidence level" based on the source of the information retrieved. A security.txt file located on the domain will have a higher priority than a Twitter account on the company's website.
 
 ```
 $ ./contact.sh -d google.com
@@ -47,6 +47,12 @@ If the company's name contains spaces, make sure to place the name inside quotes
 
 ```
 $ ./contact.sh -c "keeper security"
+```
+
+You can check a list of domains using the `-f` flag.
+
+```
+$ ./contact.sh -f domains.txt
 ```
 
 For the best results, combine both flags as follows:
