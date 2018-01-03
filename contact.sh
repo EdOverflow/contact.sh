@@ -28,8 +28,8 @@ domain() {
     if [ ${#ROBOTSTXT} -gt 0 ]; then
         printf "${RED}[!]${END} The robots.txt file does not permit crawling this hostname.\n"
     else
-        WELL_KNOWN=$(curl --silent "https://$1/.well-known/security.txt" | grep "Contact:")
-        ROOT=$(curl --silent "https://$1/security.txt" | grep "Contact:")
+        WELL_KNOWN=$(curl --silent --max-time 9 "https://$1/.well-known/security.txt" | grep "Contact:")
+        ROOT=$(curl --silent --max-time 9 "https://$1/security.txt" | grep "Contact:")
         if [ ${#WELL_KNOWN} -gt 0 ]; then
             echo "security.txt file found: https://$1/.well-known/security.txt"
             echo "$WELL_KNOWN"
@@ -74,7 +74,7 @@ domain() {
     if [ ${#ROBOTSTXT} -gt 0 ]; then
         printf "${RED}[!]${END} The robots.txt file does not permit crawling this hostname.\n"
     else
-        ADDRESS=$(curl -L --silent "https://$1/" | sed 's/</\n/g' | grep "@$1\|twitter.com\|facebook.com\|keybase.io" | sed -r 's/^.+href="([^"]+)".+$/\1/' | sed -r 's/^.+content="([^"]+)".+$/\1/')
+        ADDRESS=$(curl -L --silent --max-time 9 "https://$1/" | sed 's/</\n/g' | grep "@$1\|twitter.com\|facebook.com\|keybase.io" | sed -r 's/^.+href="([^"]+)".+$/\1/' | sed -r 's/^.+content="([^"]+)".+$/\1/')
         if [ ${#ADDRESS} -gt 0 ]; then
             echo $ADDRESS | tr " " "\n" | sort -u
         fi
@@ -102,7 +102,7 @@ domain() {
         printf "${RED}[!]${END} The robots.txt file does not permit crawling this hostname.\n"
     else
         while read page; do
-        CONTACT_PAGE=$(curl -L -I --silent "https://$1/$page" | grep -i "200 ok")
+        CONTACT_PAGE=$(curl -L -I --silent --max-time 9 "https://$1/$page" | grep -i "200 ok")
         if [ ${#CONTACT_PAGE} -gt 0 ]; then
         	printf "https://$1/$page (200 OK)\n"
         fi
@@ -119,12 +119,12 @@ domain() {
 
     # PGP keys
     printf "${GREEN}[+]${END} Checking MIT PGP Public Key Server \n | Confidence level: ${RED}★ ☆ ☆${END} \n"
-    curl --max-time 9 --silent "https://pgp.mit.edu/pks/lookup?search=$1&op=index" | sed -r 's/<[^>]*>//g' | sed -r 's/&[^;]+;//g' | grep -oE "[^ ]+@$OPTARG"
+    curl --max-time 60 --silent "https://pgp.mit.edu/pks/lookup?search=$1&op=index" | sed -r 's/<[^>]*>//g' | sed -r 's/&[^;]+;//g' | grep -oE "[^ ]+@$OPTARG"
     printf "\n"
     
     # Response header
     printf "${GREEN}[+]${END} Checking response header \n | Confidence level: ${RED}★ ☆ ☆${END} \n"
-    curl -I --silent "https://$1/" | grep "@"
+    curl -I --silent --max-time 9 "https://$1/" | grep "@"
     printf "\n"
 }
 
