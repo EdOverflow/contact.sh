@@ -15,7 +15,7 @@ LOGO+="        by EdOverflow\n\n\n"
 
 # Print this message when there are no arguments.
 if [[ $# -eq 0 ]] ; then
-	printf "%s" "$LOGO"
+	printf "%b" "$LOGO"
     printf "${CYAN}[i]${END} Description: An OSINT tool to find contacts in order to report security vulnerabilities.\n${CYAN}[i]${END} Usage: ./contact.sh [Options] use -d for hostnames (-d example.com), -c for vendor name (-c example), and -f for a list of hostnames in a file (-f domains.txt) \n${CYAN}[i]${END} Example: ./contact.sh -d google.com -c google\n"
     exit 0
 fi
@@ -135,7 +135,7 @@ while getopts ":c:d:f:h:" opt; do
             # Check hostname                            #
             #############################################
 
-            printf "%s" "$LOGO"
+            printf "%b" "$LOGO"
             OPTARG=$(basename "$OPTARG" | tr '[:upper:]' '[:lower:]')
             domain $OPTARG
         ;;
@@ -144,7 +144,7 @@ while getopts ":c:d:f:h:" opt; do
             # Check company name                        #
             #############################################
          
-            printf "%s" "$LOGO"
+            printf "%b" "$LOGO"
             
             # OPTARG should always be lowercase.
             OPTARG=${OPTARG,,}
@@ -186,7 +186,7 @@ while getopts ":c:d:f:h:" opt; do
             # Check a list of hostnames.                #
             #############################################
 
-            printf "%s" "$LOGO"
+            printf "%b" "$LOGO"
 
             while read line; do
                 printf "\n§===================================================§\n"
@@ -196,11 +196,11 @@ while getopts ":c:d:f:h:" opt; do
             done < $OPTARG
         ;;
         :)
-            printf "%s" "$LOGO"
+            printf "%b" "$LOGO"
             printf "${CYAN}[i]${END} Usage: ./contact.sh [Options] use -d for hostnames (-d example.com), -c for vendor name (-c example), and -f for a list of hostnames in a file (-f domains.txt)\n${CYAN}[i]${END} Example: ./contact.sh -d google.com -c google\n"
         ;;
         \?)
-            printf "%s" "$LOGO"
+            printf "%b" "$LOGO"
             printf "${YELLOW}[!]${END} Invalid option: -$OPTARG\n" >&2
             printf "${CYAN}[i]${END} Usage: ./contact.sh [Options] use -d for hostnames (-d example.com) and -c for vendor name (-c example)\n${CYAN}[i]${END} Example: ./contact.sh -d google.com -c google\n"
             exit 1
