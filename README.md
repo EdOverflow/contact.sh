@@ -86,9 +86,11 @@ $ ./contact.sh -d linkedin.com
         by EdOverflow
 
 
-[+] Finding security.txt files
+[+] Finding security.txt files 
+ | Confidence level: ★ ★ ★ 
 [!] The robots.txt file does not permit crawling this hostname.
 
-[+] Checking HackerOne's directory for hostname
+[+] Checking HackerOne's directory for hostname 
+ | Confidence level: ★ ★ ★ 
 https://hackerone.com/linkedin
 ```
