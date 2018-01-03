@@ -1,7 +1,7 @@
 # contact.sh
 An OSINT tool to find contacts in order to report security vulnerabilities.
 
-![image](https://user-images.githubusercontent.com/18099289/34496486-135def44-effa-11e7-8680-3e6ea79ed13a.png)
+![image](https://user-images.githubusercontent.com/18099289/34521857-494e8802-f090-11e7-9e60-a844aa34faaf.png)
 
 # Installation
 
