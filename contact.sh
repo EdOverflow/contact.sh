@@ -124,7 +124,7 @@ domain() {
     
     # Response header
     printf "${GREEN}[+]${END} Checking response header \n | Confidence level: ${RED}★ ☆ ☆${END} \n"
-    curl -I --silent --max-time 9 "https://$1/" | grep "@"
+    curl -L -I --silent --max-time 9 "https://$1/" | grep "@"
     printf "\n"
 }
 
