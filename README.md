@@ -5,9 +5,22 @@ An OSINT tool to find contacts in order to report security vulnerabilities.
 
 # Installation
 
+## 🐧 Linux
+
 Make sure you have installed the `whois` and `jq` packages.
 
 ```
+$ git clone https://github.com/EdOverflow/contact.sh.git
+$ cd contact.sh/
+$ chmod u+x contact.sh
+$ ./contact.sh -d google.com -c google
+```
+
+## 🍎 OSX
+
+```
+$ brew install gnu-sed --with-default-names
+$ brew install jq
 $ git clone https://github.com/EdOverflow/contact.sh.git
 $ cd contact.sh/
 $ chmod u+x contact.sh
@@ -59,4 +72,23 @@ For the best results, combine both flags as follows:
 
 ```
 $ ./contact.sh -d google.com -c google
+```
+
+_contact.sh_ abides by the target's robots.txt file.
+
+```
+$ ./contact.sh -d linkedin.com
+
+
+ _  _ __ _|_ _  _ _|_    _ |_ 
+(_ (_)| | |_(_|(_  |_ o _> | |
+            ---
+        by EdOverflow
+
+
+[+] Finding security.txt files
+[!] The robots.txt file does not permit crawling this hostname.
+
+[+] Checking HackerOne's directory for hostname
+https://hackerone.com/linkedin
 ```

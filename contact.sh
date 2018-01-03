@@ -138,7 +138,6 @@ while getopts ":c:d:f:h:" opt; do
             printf "$LOGO"
             OPTARG=$(basename "$OPTARG" | tr '[:upper:]' '[:lower:]')
             domain $OPTARG
-            
         ;;
         c)
             #############################################
