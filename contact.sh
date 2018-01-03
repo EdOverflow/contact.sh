@@ -33,11 +33,11 @@ domain() {
         if [ ${#WELL_KNOWN} -gt 0 ]; then
             echo "security.txt file found: https://$1/.well-known/security.txt"
             echo "$WELL_KNOWN"
-            return 0
+            # return 0
         elif [ ${#ROOT} -gt 0 ]; then
             echo "security.txt file found: https://$1/security.txt"
             echo "$ROOT"
-            return 0
+            # return 0
         fi
     fi
     printf "\n"
@@ -49,19 +49,19 @@ domain() {
         for line in $HACKERONE_PATH; do
             echo "https://hackerone.com$line"
         done
-        return 0
+        # return 0
     fi
     printf "\n"
 
     # Bugcrowd
     printf "${GREEN}[+]${END} Checking Bugcrowd's list for hostname \n | Confidence level: ${GREEN}★ ★ ★${END} \n"
-    curl --silent https://www.bugcrowd.com/bug-bounty-list/ | grep -w "^$1" | sed 's/^ *//g' | sed -r 's/^.+href="([^"]+)".+$/\1/'
+    curl --silent https://www.bugcrowd.com/bug-bounty-list/ | grep -i "$1" | sed 's/^ *//g' | sed -E 's/^.+href="([^"]+)".+$/\1/'
     printf "\n"
 
     # General bug bounty lists
     printf "${GREEN}[+]${END} Checking bug bounty lists for hostname \n | Confidence level: ${YELLOW}★ ★ ☆${END} \n"
-    curl --silent "https://www.vulnerability-lab.com/list-of-bug-bounty-programs.php" | grep $1 | sed 's/^ *//g' | sed -r 's/^.+href="([^"]+)".+$/\1/' | tr " " "\n" | sort -u
-    BOUNTYFACTORY_PATH=$(curl --silent "https://bountyfactory.io/programs" | grep -i "$1" | grep media-heading | sed -r 's/^.+href="([^"]+)".+$/\1/')
+    curl --silent "https://www.vulnerability-lab.com/list-of-bug-bounty-programs.php" | grep $1 | sed 's/^ *//g' | sed -E 's/^.+href="([^"]+)".+$/\1/' | tr " " "\n" | sort -u
+    BOUNTYFACTORY_PATH=$(curl --silent "https://bountyfactory.io/programs" | grep -i "$1" | grep media-heading | sed -E 's/^.+href="([^"]+)".+$/\1/')
     if [ ${#BOUNTYFACTORY_PATH} -gt 0 ]; then
         for line in $BOUNTYFACTORY; do
             echo "https://bountyfactory.io$line"
@@ -74,7 +74,7 @@ domain() {
     if [ ${#ROBOTSTXT} -gt 0 ]; then
         printf "${RED}[!]${END} The robots.txt file does not permit crawling this hostname.\n"
     else
-        ADDRESS=$(curl -L --silent --max-time 9 "https://$1/" | sed 's/</\n/g' | grep "@$1\|twitter.com\|facebook.com\|keybase.io" | sed -r 's/^.+href="([^"]+)".+$/\1/' | sed -r 's/^.+content="([^"]+)".+$/\1/')
+        ADDRESS=$(curl -L --silent --max-time 9 "https://$1/" | sed 's/</\n/g' | grep "@$1\|twitter.com\|facebook.com\|keybase.io" | sed -E 's/^.+href="([^"]+)".+$/\1/' | sed -E 's/^.+content="([^"]+)".+$/\1/')
         if [ ${#ADDRESS} -gt 0 ]; then
             echo $ADDRESS | tr " " "\n" | sort -u
         fi
@@ -113,13 +113,13 @@ domain() {
     # GitHub
     printf "${GREEN}[+]${END} Checking GitHub for addresses \n | Confidence level: ${RED}★ ☆ ☆${END} \n"
     ORG=$(echo "$1" | sed 's/\([[:alnum:]][[:alnum:]]*\)\.\([[:graph:]][[:graph:]]*\)/\1/g')
-    GITHUB=$(curl --silent "https://github.com/search?q=org%3A$ORG+%22$1%22&type=Code" | grep "@<em>$ORG" | sed -r 's/<[^>]*>//g' | sed -r 's/&[^;]+;//g' | grep -oE "[^ ]+@$OPTARG")
+    GITHUB=$(curl --silent "https://github.com/search?q=org%3A$ORG+%22$1%22&type=Code" | grep "@<em>$ORG" | sed -E 's/<[^>]*>//g' | sed -E 's/&[^;]+;//g' | grep -oE "[^ ]+@$OPTARG")
     echo $GITHUB | tr " " "\n" | sort -u
     printf "\n"
 
     # PGP keys
     printf "${GREEN}[+]${END} Checking MIT PGP Public Key Server \n | Confidence level: ${RED}★ ☆ ☆${END} \n"
-    curl --max-time 60 --silent "https://pgp.mit.edu/pks/lookup?search=$1&op=index" | sed -r 's/<[^>]*>//g' | sed -r 's/&[^;]+;//g' | grep -oE "[^ ]+@$OPTARG"
+    curl --max-time 60 --silent "https://pgp.mit.edu/pks/lookup?search=$1&op=index" | sed -E 's/<[^>]*>//g' | sed -E 's/&[^;]+;//g' | grep -oE "[^ ]+@$OPTARG"
     printf "\n"
     
     # Response header
@@ -157,23 +157,23 @@ while getopts ":c:d:f:h:" opt; do
                 for line in $HACKERONE; do
                     echo "https://hackerone.com/$line"
                 done
-                return 0
+                # return 0
             fi
             printf "\n"
 
             # Bugcrowd
             printf "${GREEN}[+]${END} Checking Bugcrowd's list for company name\n"
-            BUGCROWD=$(curl --silent https://www.bugcrowd.com/bug-bounty-list/ | grep -i -w "^$OPTARG" | sed -r 's/^.+href="([^"]+)".+$/\1/')
-            if [ ${#BUGCROWD} -ge 1 ]; then
+            BUGCROWD=$(curl --silent https://www.bugcrowd.com/bug-bounty-list/ | grep -i "$OPTARG" | sed -E 's/^.+href="([^"]+)".+$/\1/')
+            if [ ${#BUGCROWD} -gt 0 ]; then
                 echo $BUGCROWD
-                return 0
+                # return 0
             fi
             printf "\n"
 
             # General bug bounty lists
             printf "${GREEN}[+]${END} Checking other bug bounty lists for company name\n"
-            curl --silent "https://www.vulnerability-lab.com/list-of-bug-bounty-programs.php" | grep -i -w "^$OPTARG" | sed -r 's/^.+href="([^"]+)".+$/\1/'
-            BOUNTYFACTORY=$(curl --silent "https://bountyfactory.io/programs" | grep -i "$OPTARG" | grep media-heading | sed -r 's/^.+href="([^"]+)".+$/\1/')
+            curl --silent "https://www.vulnerability-lab.com/list-of-bug-bounty-programs.php" | grep -i -w "^$OPTARG" | sed -E 's/^.+href="([^"]+)".+$/\1/'
+            BOUNTYFACTORY=$(curl --silent "https://bountyfactory.io/programs" | grep -i "$OPTARG" | grep media-heading | sed -E 's/^.+href="([^"]+)".+$/\1/')
             if [ ${#BOUNTYFACTORY} -gt 0 ]; then
                 for line in $BOUNTYFACTORY; do
                     echo "https://bountyfactory.io$line"
