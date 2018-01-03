@@ -62,7 +62,7 @@ domain() {
     printf "${GREEN}[+]${END} Checking bug bounty lists for hostname \n | Confidence level: ${YELLOW}★ ★ ☆${END} \n"
     curl --silent "https://www.vulnerability-lab.com/list-of-bug-bounty-programs.php" | grep $1 | sed 's/^ *//g' | sed -r 's/^.+href="([^"]+)".+$/\1/' | tr " " "\n" | sort -u
     BOUNTYFACTORY_PATH=$(curl --silent "https://bountyfactory.io/programs" | grep -i "$1" | grep media-heading | sed -r 's/^.+href="([^"]+)".+$/\1/')
-    if [ ${#BOUNTYFACTORY} -gt 0 ]; then
+    if [ ${#BOUNTYFACTORY_PATH} -gt 0 ]; then
         for line in $BOUNTYFACTORY; do
             echo "https://bountyfactory.io$line"
         done
