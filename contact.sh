@@ -102,9 +102,15 @@ domain() {
         printf "${RED}[!]${END} The robots.txt file does not permit crawling this hostname.\n"
     else
         while read page; do
-        CONTACT_PAGE=$(curl -L -I --silent --max-time 9 "https://$1/$page" | grep -i "200 ok")
-        if [ ${#CONTACT_PAGE} -gt 0 ]; then
-        	printf "https://$1/$page (200 OK)\n"
+        CONTACT_PAGE=$(curl -L -I --silent --max-time 9 "https://$1/$page")
+        STATUS=$(echo "$CONTACT_PAGE" | grep -i "200 ok")
+        REDIRECT=$(echo "$CONTACT_PAGE" | grep "Location" | sed 's/Location: //')
+        if [ ${#STATUS} -gt 0 ]; then
+            if [ $REDIRECT == "https://$1/$page" ]; then
+        	    printf "(${GREEN}⏺${END} 200 OK) https://$1/$page -> $REDIRECT\n"
+            else
+                printf "(${GREEN}⏺${END} 200 OK) https://$1/$page\n"
+            fi
         fi
         done < contact_pages.txt
     fi
