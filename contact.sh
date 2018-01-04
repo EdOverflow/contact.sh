@@ -167,7 +167,7 @@ while getopts ":c:d:f:h:" opt; do
             printf "${GREEN}[+]${END} Checking Bugcrowd's list for company name\n"
             BUGCROWD=$(curl --silent https://www.bugcrowd.com/bug-bounty-list/ | grep -i "$OPTARG" | sed -E 's/^.+href="([^"]+)".+$/\1/')
             if [ ${#BUGCROWD} -gt 0 ]; then
-                echo $BUGCROWD
+                echo $BUGCROWD | tr " " "\n"
                 # return 0
             fi
             printf "\n"
