@@ -74,7 +74,7 @@ domain() {
     if [ ${#ROBOTSTXT} -gt 0 ]; then
         printf "${RED}[!]${END} The robots.txt file does not permit crawling this hostname.\n"
     else
-        ADDRESS=$(curl -L --silent --max-time 9 "https://$1/" | sed 's/</\n/g' | grep "@$1\|twitter.com\|facebook.com\|keybase.io" | sed -E 's/^.+href="([^"]+)".+$/\1/' | sed -E 's/^.+content="([^"]+)".+$/\1/')
+        ADDRESS=$(curl -L --silent --max-time 9 "https://$1/" | sed 's/</\n/g' | grep "@$1\|//twitter.com\|//facebook.com\|//keybase.io" | sed -E 's/^.+href="([^"]+)".+$/\1/' | sed -E 's/^.+content="([^"]+)".+$/\1/')
         if [ ${#ADDRESS} -gt 0 ]; then
             echo $ADDRESS | tr " " "\n" | sort -u
         fi
@@ -114,7 +114,9 @@ domain() {
     printf "${GREEN}[+]${END} Checking GitHub for addresses \n | Confidence level: ${RED}★ ☆ ☆${END} \n"
     ORG=$(echo "$1" | sed 's/\([[:alnum:]][[:alnum:]]*\)\.\([[:graph:]][[:graph:]]*\)/\1/g')
     GITHUB=$(curl --silent "https://github.com/search?q=org%3A$ORG+%22$1%22&type=Code" | grep "@<em>$ORG" | sed -E 's/<[^>]*>//g' | sed -E 's/&[^;]+;//g' | grep -oE "[^ ]+@$OPTARG")
-    echo $GITHUB | tr " " "\n" | sort -u
+    if [ ${#GITHUB} -gt 0 ]; then
+        echo $GITHUB | tr " " "\n" | sort -u
+    fi
     printf "\n"
 
     # PGP keys
