@@ -55,7 +55,7 @@ domain() {
 
     # Bugcrowd
     printf "${GREEN}[+]${END} Checking Bugcrowd's list for hostname \n | Confidence level: ${GREEN}★ ★ ★${END} \n"
-    curl --silent https://www.bugcrowd.com/bug-bounty-list/ | grep -i "$1" | sed 's/^ *//g' | sed -E 's/^.+href="([^"]+)".+$/\1/'
+    curl --silent https://www.bugcrowd.com/bug-bounty-list/ | grep -i "$1" | sed 's/^ *//g' | sed -E 's/^.+href="([^"]+)".+$/\1/' | tr " " "\n" | sort -u
     printf "\n"
 
     # General bug bounty lists
