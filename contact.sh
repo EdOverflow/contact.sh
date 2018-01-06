@@ -74,7 +74,7 @@ domain() {
     if [ ${#ROBOTSTXT} -gt 0 ]; then
         printf "${RED}[!]${END} The robots.txt file does not permit crawling this hostname.\n"
     else
-        ADDRESS=$(curl -L --silent --max-time 9 "https://$1/" | sed 's/</\n/g' | grep "@$1\|//twitter.com\|//facebook.com\|//keybase.io" | sed -E 's/^.+href="([^"]+)".+$/\1/' | sed -E 's/^.+content="([^"]+)".+$/\1/')
+        ADDRESS=$(curl -L --silent --max-time 9 "https://$1/" | sed -n 's/.*href="\([^"]*\).*/\1/p' | grep -i "twitter.com\|facebook.com\|keybase.io\|github.com\|gitlab.com\|contact")
         if [ ${#ADDRESS} -gt 0 ]; then
             echo $ADDRESS | tr " " "\n" | sort -u
         fi
@@ -93,6 +93,20 @@ domain() {
         echo "security@$1 is valid!"
     else
         printf "security@$1 is ${RED}not${END} valid.\n"
+    fi
+    printf "\n"
+
+    if [ ${#SECURITYAT} -lt 1 ]; then
+        printf "${GREEN}[+]${END} Checking for other security addresses \n | Confidence level: ${YELLOW}★ ★ ☆${END} \n"
+        ADDRESSES=("psirt" "whitehat" "contact" "responsible.disclosure" "responsible-disclosure" "vuln")
+        for i in ${ADDRESSES[@]}; do
+            EMAIL=$(curl --max-time 9 -X POST --silent http://mailtester.com/testmail.php -d "email=$i@$OPTARG" | grep "E-mail address is valid")
+            if [ ${#EMAIL} -gt 0 ]; then
+                echo "$i@$1 is valid!"
+            else
+                printf "$i@$1 is ${RED}not${END} valid.\n"
+            fi
+        done
     fi
     printf "\n"
 
