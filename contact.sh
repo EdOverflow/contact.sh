@@ -89,7 +89,7 @@ domain() {
 
     # "EXPERIMENTAL" RECURSIVE WHOIS
     # this tries to extract all emails from WHOIS ... note parsing is likely buggy so do not merge into master until further tested
-    printf "${GREEN}[+]${END} Checking WHOIS records recursively listing all addresses\n | Confidence level: ${RED}★${END} \n"
+    printf "${GREEN}[+]${END} Checking WHOIS records recursively listing all addresses\n | Confidence level: ${RED}★ ☆ ☆${END} \n"
 
     # FIXME: extracting the top domain needs more work ... there is probably already solutions for that
     topdomain=$(echo $OPTARG | grep -o "[^\/\.]*\.\(com\|cn\|net\|co\.id\|vn\|se\|my\|cl\|eu\|com\.\(cn\|my\|tw\)\)$")
