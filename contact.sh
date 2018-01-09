@@ -86,33 +86,38 @@ domain() {
     whois $OPTARG | grep "@$OPTARG" | tr -d "\t\r" | sort -u | sed 's/ //g'
     printf "\n"
 
+    # DNS
+    printf "${GREEN}[+]${END} Checking DNS SOA RNAME\n | Confidence level: ${RED}★ ☆ ☆${END} \n"
+    SOA=$(dig "${OPTARG}" SOA | grep -v ";\|^$")
+    echo "${SOA}" | awk '{print $6}' | sed 's/\([^\.]*\)\(\.\)\(.*\)\./\1@\3/'
+    printf "\n"
 
-    # "EXPERIMENTAL" RECURSIVE WHOIS
-    # this tries to extract all emails from WHOIS ... note parsing is likely buggy so do not merge into master until further tested
-    printf "${GREEN}[+]${END} Checking WHOIS records recursively listing all addresses\n | Confidence level: ${RED}★${END} \n"
-
-    # FIXME: extracting the top domain needs more work ... there is probably already solutions for that
-    topdomain=$(echo $OPTARG | grep -o "[^\/\.]*\.\(com\|cn\|net\|co\.id\|vn\|se\|my\|cl\|eu\|com\.\(cn\|my\|tw\)\)$")
-    printf " | Using domain: ${topdomain}\n"
-
-    # 1st get the real whois server the registra uses from the WHOIS record
-    tmp_whois_record="tmp_whois_record.txt" # TODO:FIXME:5325325325: prevent creating tmp files
-    whois $topdomain > $tmp_whois_record # TODO:FIXME:5325325325: prevent creating tmp files
-    # FIXME: greping the whois server from the record could be buggy as hell
-    WHOIS_SERVER=$(cat ${tmp_whois_record} | grep -v "^\(%\|#\)" | grep -i whois | head -n1 | cut -d: -f 2 | sed 's/^ *//g') # TODO:FIXME:5325325325: prevent creating tmp files
-    printf " | Using WHOIS server: ${WHOIS_SERVER}\n"
-
-    # 2nd query the registras WHOIS server if it exists
-    if [[ -n "${WHOIS_SERVER}" ]]; then
-	# append to the other whois record
-        whois ${topdomain} -h ${WHOIS_SERVER} >> $tmp_whois_record # TODO:FIXME:5325325325: prevent creating tmp files
-    fi
-
-    # 3rd extract all emails
-    cat $tmp_whois_record | grep -o "[^ :]*@[^ ]*" | sort -u # TODO:FIXME:5325325325: prevent creating tmp files
-
-    rm $tmp_whois_record # TODO:FIXME:5325325325: prevent creating tmp files
-
+    # RECURSIVE WHOIS
+    printf "${GREEN}[+]${END} Checking WHOIS records recursively listing all addresses\n | Confidence level: ${RED}★ ☆ ☆${END} \n"
+    domain="${OPTARG}"
+    while [ -n "${domain}" ]; do
+        printf " | Trying with domain: ${domain}\n"
+        whoisfile=$(mktemp)
+        whois -H "${domain}" > "${whoisfile}"
+        # TODO: add more search tags, currently tested with top 2k of http://s3.amazonaws.com/alexa-static/top-1m.csv.zip
+        for search in "Registrar WHOIS Server:" \
+                      "WHOIS Server:" \
+                      "Registrar URL: whois.godaddy.com"; do
+            whoisserver=$(cat "${whoisfile}" | grep -v "^%\|^#\|>" | grep -i "${search}" | cut -d: -f 2 | sed 's/ //g')
+    	if [[ "${whoisserver}" && "$(dig "${whoisserver}" +short)" ]]; then
+        	    printf " + Using WHOIS server: ${whoisserver}\n"
+    	    whois -H "${domain}" -h "${whoisserver}" >> "${whoisfile}"
+            fi
+        done
+        cat "${whoisfile}" | grep -o "[^ :]*@[^ ]*" | sort -u
+        # TODO: add more search tags, currently tested with top 2k of http://s3.amazonaws.com/alexa-static/top-1m.csv.zip
+        for search in "for webbased whois" \
+                      "for web based whois"; do
+            cat "${whoisfile}" | grep -v "^%\|^#\|>" | grep -i "${search}" | sort -u
+        done
+        rm "${whoisfile}"
+        domain="$(echo ${domain} | sed 's/[^\.]*\.\(.*\)/\1/g' | grep '\.')"
+    done
     printf "\n"
 
     # RFC 2142 (security@)
