@@ -105,7 +105,7 @@ domain() {
                       "Registrar URL: whois.godaddy.com"; do
             whoisserver=$(cat "${whoisfile}" | grep -v "^%\|^#\|>" | grep -i "${search}" | cut -d: -f 2 | sed 's/ //g')
     	if [[ "${whoisserver}" && "$(dig "${whoisserver}" +short)" ]]; then
-        	    printf " + Using WHOIS server: ${whoisserver}\n"
+        	    printf " | Using WHOIS server: ${whoisserver}\n"
     	    whois -H "${domain}" -h "${whoisserver}" >> "${whoisfile}"
             fi
         done
