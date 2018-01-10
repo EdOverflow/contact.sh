@@ -86,6 +86,40 @@ domain() {
     whois $OPTARG | grep "@$OPTARG" | tr -d "\t\r" | sort -u | sed 's/ //g'
     printf "\n"
 
+    # DNS
+    printf "${GREEN}[+]${END} Checking DNS SOA RNAME\n | Confidence level: ${RED}★ ☆ ☆${END} \n"
+    SOA=$(dig "${OPTARG}" SOA | grep -v ";\|^$")
+    echo "${SOA}" | awk '{print $6}' | sed 's/\([^\.]*\)\(\.\)\(.*\)\./\1@\3/'
+    printf "\n"
+
+    # RECURSIVE WHOIS
+    printf "${GREEN}[+]${END} Checking WHOIS records recursively listing all addresses\n | Confidence level: ${RED}★ ☆ ☆${END} \n"
+    domain="${OPTARG}"
+    while [ -n "${domain}" ]; do
+        printf " | Trying with domain: ${domain}\n"
+        whoisfile=$(mktemp)
+        whois -H "${domain}" > "${whoisfile}"
+        # TODO: add more search tags, currently tested with top 2k of http://s3.amazonaws.com/alexa-static/top-1m.csv.zip
+        for search in "Registrar WHOIS Server:" \
+                      "WHOIS Server:" \
+                      "Registrar URL: whois.godaddy.com"; do
+            whoisserver=$(cat "${whoisfile}" | grep -v "^%\|^#\|>" | grep -i "${search}" | cut -d: -f 2 | sed 's/ //g')
+    	if [[ "${whoisserver}" && "$(dig "${whoisserver}" +short)" ]]; then
+        	    printf " | Using WHOIS server: ${whoisserver}\n"
+    	    whois -H "${domain}" -h "${whoisserver}" >> "${whoisfile}"
+            fi
+        done
+        cat "${whoisfile}" | grep -o "[^ :]*@[^ ]*" | sort -u
+        # TODO: add more search tags, currently tested with top 2k of http://s3.amazonaws.com/alexa-static/top-1m.csv.zip
+        for search in "for webbased whois" \
+                      "for web based whois"; do
+            cat "${whoisfile}" | grep -v "^%\|^#\|>" | grep -i "${search}" | sort -u
+        done
+        rm "${whoisfile}"
+        domain="$(echo ${domain} | sed 's/[^\.]*\.\(.*\)/\1/g' | grep '\.')"
+    done
+    printf "\n"
+
     # RFC 2142 (security@)
     printf "${GREEN}[+]${END} Doing an RFC 2142 check (security@$1) \n | Confidence level: ${YELLOW}★ ★ ☆${END} \n"
     SECURITYAT=$(curl --max-time 9 -X POST --silent http://mailtester.com/testmail.php -d "email=security@$OPTARG" | grep "E-mail address is valid")
