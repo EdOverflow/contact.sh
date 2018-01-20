@@ -55,7 +55,7 @@ domain() {
 
     # Bugcrowd
     printf "${GREEN}[+]${END} Checking Bugcrowd's list for hostname \n | Confidence level: ${GREEN}★ ★ ★${END} \n"
-    curl --silent https://www.bugcrowd.com/bug-bounty-list/ | grep -i "$1" | sed 's/^ *//g' | sed -E 's/^.+href="([^"]+)".+$/\1/' | tr " " "\n" | sort -u
+    curl --silent https://www.bugcrowd.com/bug-bounty-list/ | grep -i "$1" | sed 's/^ *//g' | sed -E 's/^.+href="([^"]+)".+$/\1/'
     printf "\n"
 
     # General bug bounty lists
@@ -74,7 +74,7 @@ domain() {
     if [ ${#ROBOTSTXT} -gt 0 ]; then
         printf "${RED}[!]${END} The robots.txt file does not permit crawling this hostname.\n"
     else
-        ADDRESS=$(curl -L --silent --max-time 9 "https://$1/" | sed -n 's/.*href="\([^"]*\).*/\1/p' | grep -i "twitter.com\|facebook.com\|keybase.io\|github.com\|gitlab.com\|contact")
+        ADDRESS=$(curl -L --silent --max-time 9 "https://$1/" | sed 's/</\n/g' | grep "@$1\|//twitter.com\|//facebook.com\|//keybase.io" | sed -E 's/^.+href="([^"]+)".+$/\1/' | sed -E 's/^.+content="([^"]+)".+$/\1/')
         if [ ${#ADDRESS} -gt 0 ]; then
             echo $ADDRESS | tr " " "\n" | sort -u
         fi
@@ -84,40 +84,6 @@ domain() {
     # WHOIS
     printf "${GREEN}[+]${END} Checking WHOIS record \n | Confidence level: ${YELLOW}★ ★ ☆${END} \n"
     whois $OPTARG | grep "@$OPTARG" | tr -d "\t\r" | sort -u | sed 's/ //g'
-    printf "\n"
-
-    # DNS
-    printf "${GREEN}[+]${END} Checking DNS SOA RNAME\n | Confidence level: ${RED}★ ☆ ☆${END} \n"
-    SOA=$(dig "${OPTARG}" SOA | grep -v ";\|^$")
-    echo "${SOA}" | awk '{print $6}' | sed 's/\([^\.]*\)\(\.\)\(.*\)\./\1@\3/'
-    printf "\n"
-
-    # RECURSIVE WHOIS
-    printf "${GREEN}[+]${END} Checking WHOIS records recursively listing all addresses\n | Confidence level: ${RED}★ ☆ ☆${END} \n"
-    domain="${OPTARG}"
-    while [ -n "${domain}" ]; do
-        printf " | Trying with domain: ${domain}\n"
-        whoisfile=$(mktemp)
-        whois -H "${domain}" > "${whoisfile}"
-        # TODO: add more search tags, currently tested with top 2k of http://s3.amazonaws.com/alexa-static/top-1m.csv.zip
-        for search in "Registrar WHOIS Server:" \
-                      "WHOIS Server:" \
-                      "Registrar URL: whois.godaddy.com"; do
-            whoisserver=$(cat "${whoisfile}" | grep -v "^%\|^#\|>" | grep -i "${search}" | cut -d: -f 2 | sed 's/ //g')
-    	if [[ "${whoisserver}" && "$(dig "${whoisserver}" +short)" ]]; then
-        	    printf " | Using WHOIS server: ${whoisserver}\n"
-    	    whois -H "${domain}" -h "${whoisserver}" >> "${whoisfile}"
-            fi
-        done
-        cat "${whoisfile}" | grep -o "[^ :]*@[^ ]*" | sort -u
-        # TODO: add more search tags, currently tested with top 2k of http://s3.amazonaws.com/alexa-static/top-1m.csv.zip
-        for search in "for webbased whois" \
-                      "for web based whois"; do
-            cat "${whoisfile}" | grep -v "^%\|^#\|>" | grep -i "${search}" | sort -u
-        done
-        rm "${whoisfile}"
-        domain="$(echo ${domain} | sed 's/[^\.]*\.\(.*\)/\1/g' | grep '\.')"
-    done
     printf "\n"
 
     # RFC 2142 (security@)
@@ -130,20 +96,6 @@ domain() {
     fi
     printf "\n"
 
-    if [ ${#SECURITYAT} -lt 1 ]; then
-        printf "${GREEN}[+]${END} Checking for other security addresses \n | Confidence level: ${YELLOW}★ ★ ☆${END} \n"
-        ADDRESSES=("psirt" "whitehat" "contact" "responsible.disclosure" "responsible-disclosure" "vuln")
-        for i in ${ADDRESSES[@]}; do
-            EMAIL=$(curl --max-time 9 -X POST --silent http://mailtester.com/testmail.php -d "email=$i@$OPTARG" | grep "E-mail address is valid")
-            if [ ${#EMAIL} -gt 0 ]; then
-                echo "$i@$1 is valid!"
-            else
-                printf "$i@$1 is ${RED}not${END} valid.\n"
-            fi
-        done
-    fi
-    printf "\n"
-
     # Contact pages on website.
     printf "${GREEN}[+]${END} Searching for contact pages \n | Confidence level: ${YELLOW}★ ★ ☆${END} \n"
     if [ ${#ROBOTSTXT} -gt 0 ]; then
@@ -153,8 +105,8 @@ domain() {
         CONTACT_PAGE=$(curl -L -I --silent --max-time 9 "https://$1/$page")
         STATUS=$(echo "$CONTACT_PAGE" | grep -i "200 ok")
         REDIRECT=$(echo "$CONTACT_PAGE" | grep "Location" | sed 's/Location: //')
-        if [ ${#STATUS} -gt 0 ]; then
-            if [ $REDIRECT == "https://$1/$page" ]; then
+        if [[ ${#STATUS} -gt 0 ]]; then
+            if [[ $REDIRECT == "https://$1/$page" ]]; then
         	    printf "(${GREEN}⏺${END} 200 OK) https://$1/$page -> $REDIRECT\n"
             else
                 printf "(${GREEN}⏺${END} 200 OK) https://$1/$page\n"
