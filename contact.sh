@@ -28,24 +28,32 @@ domain() {
     if [ ${#ROBOTSTXT} -gt 0 ]; then
         printf "${RED}[!]${END} The robots.txt file does not permit crawling this hostname.\n"
     else
-        WELL_KNOWN=$(curl --silent --max-time 9 "https://$1/.well-known/security.txt" | grep "Contact:")
-        ROOT=$(curl --silent --max-time 9 "https://$1/security.txt" | grep "Contact:")
-        WWW_WELL_KNOWN=$(curl --silent --max-time 9 "https://www.$1/.well-known/security.txt" | grep "Contact:")
-        WWW_ROOT=$(curl --silent --max-time 9 "https://www.$1/security.txt" | grep "Contact:")
+        if [[ $1 = 'www.'* ]]; then
+            NAKED=$(echo $1 | sed "s/^www.//") # remove www.
+            WWW="$1"
+        else
+            NAKED="$1"
+            WWW="www.$1" # add www.
+        fi
+
+        WELL_KNOWN=$(curl --silent --max-time 9 "https://$NAKED/.well-known/security.txt" | grep "Contact:")
+        ROOT=$(curl --silent --max-time 9 "https://$NAKED/security.txt" | grep "Contact:")
+        WWW_WELL_KNOWN=$(curl --silent --max-time 9 "https://$WWW/.well-known/security.txt" | grep "Contact:")
+        WWW_ROOT=$(curl --silent --max-time 9 "https://$WWW/security.txt" | grep "Contact:")
         if [ ${#WELL_KNOWN} -gt 0 ]; then
-            echo "security.txt file found: https://$1/.well-known/security.txt"
+            echo "security.txt file found: https://$NAKED/.well-known/security.txt"
             echo "$WELL_KNOWN"
             # return 0
         elif [ ${#ROOT} -gt 0 ]; then
-            echo "security.txt file found: https://$1/security.txt"
+            echo "security.txt file found: https://$NAKED/security.txt"
             echo "$ROOT"
             # return 0
         elif [ ${#WWW_WELL_KNOWN} -gt 0 ]; then
-            echo "security.txt file found: https://www.$1/.well-known/security.txt"
+            echo "security.txt file found: https://$WWW/.well-known/security.txt"
             echo "$WWW_WELL_KNOWN"
             # return 0
         elif [ ${#WWW_ROOT} -gt 0 ]; then
-            echo "security.txt file found: https://www.$1/security.txt"
+            echo "security.txt file found: https://$WWW/security.txt"
             echo "$WWW_ROOT"
             # return 0
         fi
