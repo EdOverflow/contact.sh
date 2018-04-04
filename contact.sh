@@ -30,6 +30,8 @@ domain() {
     else
         WELL_KNOWN=$(curl --silent --max-time 9 "https://$1/.well-known/security.txt" | grep "Contact:")
         ROOT=$(curl --silent --max-time 9 "https://$1/security.txt" | grep "Contact:")
+        WWW_WELL_KNOWN=$(curl --silent --max-time 9 "https://www.$1/.well-known/security.txt" | grep "Contact:")
+        WWW_ROOT=$(curl --silent --max-time 9 "https://www.$1/security.txt" | grep "Contact:")
         if [ ${#WELL_KNOWN} -gt 0 ]; then
             echo "security.txt file found: https://$1/.well-known/security.txt"
             echo "$WELL_KNOWN"
@@ -37,6 +39,14 @@ domain() {
         elif [ ${#ROOT} -gt 0 ]; then
             echo "security.txt file found: https://$1/security.txt"
             echo "$ROOT"
+            # return 0
+        elif [ ${#WWW_WELL_KNOWN} -gt 0 ]; then
+            echo "security.txt file found: https://www.$1/.well-known/security.txt"
+            echo "$WWW_WELL_KNOWN"
+            # return 0
+        elif [ ${#WWW_ROOT} -gt 0 ]; then
+            echo "security.txt file found: https://www.$1/security.txt"
+            echo "$WWW_ROOT"
             # return 0
         fi
     fi
