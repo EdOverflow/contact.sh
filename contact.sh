@@ -78,7 +78,7 @@ domain() {
 
     # General bug bounty lists
     printf "${GREEN}[+]${END} Checking bug bounty lists for hostname \n | Confidence level: ${YELLOW}★ ★ ☆${END} \n"
-    curl --silent "https://www.vulnerability-lab.com/list-of-bug-bounty-programs.php" | grep $1 | sed 's/^ *//g' | sed -E 's/^.+href="([^"]+)".+$/\1/' | tr " " "\n" | sort -u
+    curl --silent "https://www.vulnerability-lab.com/list-of-bug-bounty-programs.php" | grep "$1" | sed 's/^ *//g' | sed -E 's/^.+href="([^"]+)".+$/\1/' | tr " " "\n" | sort -u
     BOUNTYFACTORY_PATH=$(curl --silent "https://bountyfactory.io/programs" | grep -i "$1" | grep media-heading | sed -E 's/^.+href="([^"]+)".+$/\1/')
     if [ ${#BOUNTYFACTORY_PATH} -gt 0 ]; then
         for line in $BOUNTYFACTORY; do
@@ -94,14 +94,14 @@ domain() {
     else
         ADDRESS=$(curl -L --silent --max-time 9 "https://$1/" | sed 's/</\n/g' | grep "@$1\|//twitter.com\|//facebook.com\|//keybase.io" | sed -E 's/^.+href="([^"]+)".+$/\1/' | sed -E 's/^.+content="([^"]+)".+$/\1/')
         if [ ${#ADDRESS} -gt 0 ]; then
-            echo $ADDRESS | tr " " "\n" | sort -u
+            echo "$ADDRESS" | tr " " "\n" | sort -u
         fi
     fi
     printf "\n"
 
     # WHOIS
     printf "${GREEN}[+]${END} Checking WHOIS record \n | Confidence level: ${YELLOW}★ ★ ☆${END} \n"
-    whois $OPTARG | grep "@$OPTARG" | tr -d "\t\r" | sort -u | sed 's/ //g'
+    whois "$OPTARG" | grep "@$OPTARG" | tr -d "\t\r" | sort -u | sed 's/ //g'
     printf "\n"
 
     # RFC 2142 (security@)
@@ -119,7 +119,7 @@ domain() {
     if [ ${#ROBOTSTXT} -gt 0 ]; then
         printf "${RED}[!]${END} The robots.txt file does not permit crawling this hostname.\n"
     else
-        while read page; do
+        while read -r page; do
         CONTACT_PAGE=$(curl -L -I --silent --max-time 9 "https://$1/$page")
         STATUS=$(echo "$CONTACT_PAGE" | grep -i "200 ok")
         REDIRECT=$(echo "$CONTACT_PAGE" | grep "Location" | sed 's/Location: //')
@@ -139,7 +139,7 @@ domain() {
     ORG=$(echo "$1" | sed 's/\([[:alnum:]][[:alnum:]]*\)\.\([[:graph:]][[:graph:]]*\)/\1/g')
     GITHUB=$(curl --silent "https://github.com/search?q=org%3A$ORG+%22$1%22&type=Code" | grep "@<em>$ORG" | sed -E 's/<[^>]*>//g' | sed -E 's/&[^;]+;//g' | grep -oE "[^ ]+@$OPTARG")
     if [ ${#GITHUB} -gt 0 ]; then
-        echo $GITHUB | tr " " "\n" | sort -u
+        echo "$GITHUB" | tr " " "\n" | sort -u
     fi
     printf "\n"
 
@@ -163,7 +163,7 @@ while getopts ":c:d:f:h:" opt; do
 
             printf "%b" "$LOGO"
             OPTARG=$(basename "$OPTARG" | tr '[:upper:]' '[:lower:]')
-            domain $OPTARG
+            domain "$OPTARG"
         ;;
         c)
             #############################################
@@ -191,7 +191,7 @@ while getopts ":c:d:f:h:" opt; do
             printf "${GREEN}[+]${END} Checking Bugcrowd's list for company name\n"
             BUGCROWD=$(curl --silent https://www.bugcrowd.com/bug-bounty-list/ | grep -i "$OPTARG" | sed -E 's/^.+href="([^"]+)".+$/\1/')
             if [ ${#BUGCROWD} -gt 0 ]; then
-                echo $BUGCROWD | tr " " "\n"
+                echo "$BUGCROWD" | tr " " "\n"
                 # return 0
             fi
             printf "\n"
@@ -214,12 +214,12 @@ while getopts ":c:d:f:h:" opt; do
 
             printf "%b" "$LOGO"
 
-            while read line; do
+            while read -r line; do
                 printf "\n§===================================================§\n"
                 printf "\n${CYAN}[i]${END} Running contact.sh against $line.\n"
                 printf "\n§===================================================§\n"
-               	domain $line
-            done < $OPTARG
+               	domain "$line"
+            done < "$OPTARG"
         ;;
         :)
             printf "%b" "$LOGO"
