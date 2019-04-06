@@ -3,6 +3,8 @@ An OSINT tool to find contacts in order to report security vulnerabilities.
 
 ![image](https://user-images.githubusercontent.com/18099289/34521857-494e8802-f090-11e7-9e60-a844aa34faaf.png)
 
+<a href="https://www.buymeacoffee.com/edoverflow" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;" ></a>
+
 # Installation
 
 ## 🐧 Linux
@@ -110,13 +112,3 @@ The bug tracker utilizes several labels to help organize and identify issues.
 ### Guidelines for bug reports 🐛
 
 Use the GitHub issue search — check if the issue has already been reported.
-
-# Donations
-
-If you would like to support my work, you can use any of the addresses below:
-
-**Liberapay:** https://liberapay.com/EdOverflow
-
-**Bitcoin:** `1E2fZRNrrkCKPnWpKZAsJzByBoyoBURADN`
-
-**Ethereum:** `0xe98FC23fB4A8762d700c0354979dA5Db6c29Acc3`
