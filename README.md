@@ -7,7 +7,7 @@ An OSINT tool to find contacts in order to report security vulnerabilities.
 
 # Installation
 
-## 🐧 Linux
+## 🐧 GNU/Linux
 
 Make sure you have installed the `whois` and `jq` packages.
 
