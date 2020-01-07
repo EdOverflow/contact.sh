@@ -106,7 +106,7 @@ domain() {
 
     # RFC 2142 (security@)
     printf "${GREEN}[+]${END} Doing an RFC 2142 check (security@$1) \n | Confidence level: ${YELLOW}★ ★ ☆${END} \n"
-    SECURITYAT=$(curl --max-time 9 -X POST --silent http://mailtester.com/testmail.php -d "email=security@$OPTARG" | grep "E-mail address is valid")
+    SECURITYAT=$(curl --max-time 9 -X POST --silent https://mailtester.com/testmail.php -d "email=security@$OPTARG" | grep "E-mail address is valid")
     if [ ${#SECURITYAT} -gt 0 ]; then
         echo "security@$1 is valid!"
     else
