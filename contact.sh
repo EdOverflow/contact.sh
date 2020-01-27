@@ -110,7 +110,7 @@ domain() {
     if [[ $(echo "$SECURITYAT" | grep "E-mail address is valid") ]]; then
         printf "security@$1 ${GREEN}is valid!${END}\n"
     elif [[ $(echo "$SECURITYAT" | grep "Server doesn't allow e-mail address verification") ]]; then
-        echo "Server doesn't allow e-mail address verification."
+        printf "${RED}Error:${END} Server doesn't allow e-mail address verification.\n"
     else
         printf "security@$1 is ${RED}not${END} valid.\n"
     fi
